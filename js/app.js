@@ -462,6 +462,92 @@
     }
 
     /**
+     * Display Custom Modal for Editing a Todo Task
+     * @param {string} initialValue Current todo task text
+     * @param {function} onSave Callback function executed on save
+     */
+    function showEditTodoModal(initialValue, onSave) {
+        const existingModal = document.getElementById("custom-edit-todo-modal");
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "custom-edit-todo-modal";
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); display: flex; align-items: center;
+            justify-content: center; z-index: 9999; backdrop-filter: blur(4px);
+        `;
+
+        modal.innerHTML = `
+            <div style="background: var(--modal-bg, #ffffff); padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid var(--secondary); animation: fadeIn 0.3s ease;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; font-family: var(--font-heading); color: var(--text);">✏️ Edit Task</h3>
+                <p style="margin-bottom: 1rem; color: var(--text-light); font-size: 0.9rem;">Update your task details below:</p>
+                
+                <div class="modal-input-group" style="margin-bottom: 1rem;">
+                    <input type="text" id="modal-todo-text" value="${escapeHtml(initialValue)}" placeholder="Task text..." style="text-align: center; font-size: 1rem; font-weight: 500;">
+                    <div id="modal-todo-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: none;"></div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="cancel-edit-todo-modal" class="btn reset" style="background: #e2e8f0; color: #475569;">Cancel</button>
+                    <button id="save-edit-todo-modal" class="btn add" style="background: var(--primary); color: #003366;">Save Changes</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const input = document.getElementById("modal-todo-text");
+        const errorEl = document.getElementById("modal-todo-error");
+
+        if (input) {
+            input.focus();
+            input.select();
+            
+            input.addEventListener("input", () => {
+                if (errorEl) errorEl.style.display = "none";
+            });
+        }
+
+        const closeModal = () => modal.remove();
+
+        const handleSave = () => {
+            const cleanText = input.value.trim();
+            
+            if (!cleanText) {
+                if (errorEl) {
+                    errorEl.textContent = "⚠️ Task cannot be empty!";
+                    errorEl.style.display = "block";
+                }
+                return;
+            }
+
+            // Check duplicate task (excluding current original text)
+            const isDuplicate = state.todos.some(todo => 
+                todo.text.trim().toLowerCase() === cleanText.toLowerCase() && 
+                todo.text.trim().toLowerCase() !== initialValue.trim().toLowerCase()
+            );
+
+            if (isDuplicate) {
+                if (errorEl) {
+                    errorEl.textContent = "⚠️ This task already exists!";
+                    errorEl.style.display = "block";
+                }
+                return;
+            }
+
+            onSave(cleanText);
+            closeModal();
+        };
+
+        document.getElementById("cancel-edit-todo-modal").addEventListener("click", closeModal);
+        document.getElementById("save-edit-todo-modal").addEventListener("click", handleSave);
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleSave();
+        });
+    }
+
+    /**
      * Display Custom Modal so Audio Loop continues without browser alert freezing
      * @param {string} message Completion message
      * @param {function} onConfirm Action executed when user clicks OK
@@ -720,6 +806,66 @@
                 );
             });
         });
+
+        // Render todo items with edit button (.todo-edit) next to delete button (.todo-delete)
+        container.innerHTML = sortedTodos.map(todo => `
+            <div class="todo-item ${todo.completed ? "completed" : ""}">
+                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.completed ? "checked" : ""}>
+                <span class="todo-text" title="Double-click to edit">${escapeHtml(todo.text)}</span>
+                <button class="todo-edit" data-id="${todo.id}" title="Edit task">✏️</button>
+                <button class="todo-delete" data-id="${todo.id}" title="Delete task">🗑️</button>
+            </div>
+        `).join("");
+
+        // 1. Event listener for Edit button click (✏️)
+        container.querySelectorAll(".todo-edit").forEach(button => {
+            button.addEventListener("click", (e) => {
+                const id = e.target.dataset.id;
+                const todo = state.todos.find(t => t.id === id);
+                if (!todo) return;
+
+                showEditTodoModal(todo.text, (newText) => {
+                    if (newText !== todo.text) {
+                        todo.text = newText;
+                        todo.updatedAt = new Date().toISOString();
+                        saveState();
+                        renderTodos();
+                        showSuccess("Task updated successfully!");
+                    }
+                });
+            });
+        });
+
+        // 2. Event listener for double-clicking task text as a quick shortcut
+        container.querySelectorAll(".todo-text").forEach(textSpan => {
+            textSpan.addEventListener("dblclick", (e) => {
+                const item = e.target.closest(".todo-item");
+                const checkbox = item.querySelector(".todo-checkbox");
+                const id = checkbox.dataset.id;
+                const todo = state.todos.find(t => t.id === id);
+                if (!todo) return;
+
+                showEditTodoModal(todo.text, (newText) => {
+                    if (newText !== todo.text) {
+                        todo.text = newText;
+                        todo.updatedAt = new Date().toISOString();
+                        saveState();
+                        renderTodos();
+                        showSuccess("Task updated successfully!");
+                    }
+                });
+            });
+        });
+
+        // Calculate task progress statistics
+        const total = state.todos.length;
+        const completed = state.todos.filter(t => t.completed).length;
+        
+        // Update todo header title with progress counter
+        const todoHeader = document.querySelector(".todo-header h2");
+        if (todoHeader) {
+            todoHeader.innerHTML = `<span class="icon">📝</span> To-Do List <small style="font-size:0.8rem; font-weight:normal; color:var(--text-light);">(${completed}/${total})</small>`;
+        }
     }
 
     /**
@@ -1069,6 +1215,19 @@
                 });
             }
         });
+
+        // Event listeners for preset timer buttons
+        document.querySelectorAll(".preset-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                if (state.timer.isRunning) return;
+                const min = e.target.dataset.min;
+                const sec = e.target.dataset.sec;
+                
+                document.getElementById("custom-minutes-input").value = min;
+                document.getElementById("custom-seconds-input").value = sec;
+                resetTimer();
+            });
+        });
         
         // Todo input submission and validation reset
         const todoInput = document.getElementById("todo-input");
@@ -1109,6 +1268,30 @@
                 });
             });
         }
+
+        // Keyboard Shortcuts Listener (Esc & Space)
+        document.addEventListener("keydown", (e) => {
+            // Press ESC to exit Focus Overlay or close open modals
+            if (e.key === "Escape") {
+                const focusOverlay = document.getElementById("focus-overlay");
+                if (focusOverlay && focusOverlay.classList.contains("active")) {
+                    stopTimer();
+                }
+            }
+
+            // Press Spacebar to Pause/Resume while inside Focus Overlay
+            if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+                const focusOverlay = document.getElementById("focus-overlay");
+                if (focusOverlay && focusOverlay.classList.contains("active")) {
+                    e.preventDefault();
+                    if (state.timer.isRunning) {
+                        pauseTimer();
+                    } else {
+                        resumeTimer();
+                    }
+                }
+            }
+        });
     }
 
     // Add CSS keyframe animation for fadeIn feedback messages dynamically

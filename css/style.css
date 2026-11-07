@@ -401,6 +401,19 @@ footer {
     transform: scale(1.2);
 }
 
+.todo-edit {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0 var(--spacing-xs);
+    transition: transform 0.2s ease;
+}
+
+.todo-edit:hover {
+    transform: scale(1.2);
+}
+
 .todo-empty, .link-empty {
     text-align: center;
     padding: var(--spacing-md);
