@@ -365,7 +365,7 @@
     }
 
     /**
-     * Display Custom Modal for Adding Quick Link
+     * Display Custom Modal for Adding Quick Link (With Enter Key & Theme Support)
      * @param {function} onSave Callback function with name and url
      */
     function showAddLinkModal(onSave) {
@@ -381,8 +381,8 @@
         `;
 
         modal.innerHTML = `
-            <div style="background: #ffffff; padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid #ffd166; animation: fadeIn 0.3s ease;">
-                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; font-family: var(--font-heading); color: #333;">🔗 Add Quick Link</h3>
+            <div style="background: var(--modal-bg, #ffffff); padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid #ffd166; animation: fadeIn 0.3s ease;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; font-family: var(--font-heading); color: var(--text, #333);">🔗 Add Quick Link</h3>
                 
                 <div class="modal-input-group">
                     <label for="modal-link-name">Website Name</label>
@@ -407,18 +407,39 @@
 
         const closeModal = () => modal.remove();
 
-        document.getElementById("cancel-link-modal").addEventListener("click", closeModal);
-
-        document.getElementById("save-link-modal").addEventListener("click", () => {
+        // 1. Function to process saving link input
+        const handleSave = () => {
             const name = nameInput.value.trim();
-            const url = urlInput.value.trim();
+            let url = urlInput.value.trim();
+            
             if (name && url) {
+                // Prepend https:// if protocol is missing
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
                 onSave(name, url);
                 closeModal();
             } else {
                 showError("Name and URL cannot be empty!", "add-link");
             }
-        });
+        };
+
+        // 2. Event listener for Save button click
+        document.getElementById("save-link-modal").addEventListener("click", handleSave);
+
+        // 3. Event listener for Cancel button click
+        document.getElementById("cancel-link-modal").addEventListener("click", closeModal);
+
+        // 4. Event listener for Enter Key inside input fields
+        const handleEnterKey = (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                handleSave();
+            }
+        };
+
+        nameInput.addEventListener("keydown", handleEnterKey);
+        urlInput.addEventListener("keydown", handleEnterKey);
     }
 
     /**
@@ -996,7 +1017,7 @@
     }
 
     /**
-     * Display Custom Modal for Editing a Quick Link
+     * Display Custom Modal for Editing a Quick Link (With Enter Key support)
      * @param {string} initialName Current link name
      * @param {string} initialUrl Current link URL
      * @param {function} onSave Callback function executed on save
@@ -1036,6 +1057,7 @@
 
         const nameInput = document.getElementById("modal-edit-link-name");
         const urlInput = document.getElementById("modal-edit-link-url");
+
         if (nameInput) {
             nameInput.focus();
             nameInput.select();
@@ -1043,9 +1065,7 @@
 
         const closeModal = () => modal.remove();
 
-        document.getElementById("cancel-edit-link-modal").addEventListener("click", closeModal);
-
-        document.getElementById("save-edit-link-modal").addEventListener("click", () => {
+        const handleSave = () => {
             const name = nameInput.value.trim();
             let url = urlInput.value.trim();
             
@@ -1058,7 +1078,24 @@
             } else {
                 showError("Name and URL cannot be empty!", "add-link");
             }
-        });
+        };
+
+        // Event listener for Save button click
+        document.getElementById("save-edit-link-modal").addEventListener("click", handleSave);
+
+        // Event listener for Cancel button click
+        document.getElementById("cancel-edit-link-modal").addEventListener("click", closeModal);
+
+        // Event listener to handle Enter key inside both input fields
+        const handleEnterKey = (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                handleSave();
+            }
+        };
+
+        nameInput.addEventListener("keydown", handleEnterKey);
+        urlInput.addEventListener("keydown", handleEnterKey);
     }
     
     // ======================
@@ -1361,6 +1398,20 @@
                 });
             });
         }
+
+        // Handle Enter keypress on Add Quick Link input fields
+        const linkNameInput = document.getElementById("link-name-input");
+        const linkUrlInput = document.getElementById("link-url-input");
+        
+        const handleAddLinkEnter = (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addQuickLink(); // Call your existing add link function
+            }
+        };
+
+        if (linkNameInput) linkNameInput.addEventListener("keydown", handleAddLinkEnter);
+        if (linkUrlInput) linkUrlInput.addEventListener("keydown", handleAddLinkEnter);
 
         // Global Keyboard Shortcuts Listener (Esc & Spacebar)
         document.addEventListener("keydown", (e) => {
