@@ -139,6 +139,19 @@ body {
     margin-top: 0.3rem;
 }
 
+.editable-name {
+    cursor: pointer;
+    border-bottom: 2px dashed var(--secondary);
+    padding: 0 4px;
+    transition: all 0.2s ease;
+}
+
+.editable-name:hover {
+    color: var(--primary);
+    background: rgba(163, 217, 255, 0.15);
+    border-radius: 6px;
+}
+
 /* Timer Card */
 .timer {
     border-color: var(--accent);

@@ -16,6 +16,7 @@
     let state = {
         todos: [],
         quickLinks: [],
+        userName: "Friend", // default name
         timer: {
             isRunning: false,
             remainingSeconds: CONFIG.TIMER_DURATION,
@@ -138,14 +139,16 @@
         const now = new Date();
         const currentTime = document.getElementById("current-time");
         const currentDate = document.getElementById("current-date");
-        const greetingText = document.getElementById("greeting-text");
+        const greetingTitle = document.getElementById("greeting-title");
+        const userNameEl = document.getElementById("user-name");
         const quoteSubtext = document.getElementById("quote-subtext");
         
         if (currentTime) currentTime.textContent = formatTime(now);
         if (currentDate) currentDate.textContent = formatDate(now);
         
         const greetingData = getGreetingData(now.getHours());
-        if (greetingText) greetingText.textContent = greetingData.greeting;
+        if (greetingTitle) greetingTitle.textContent = greetingData.greeting;
+        if (userNameEl) userNameEl.textContent = state.userName;
         if (quoteSubtext) quoteSubtext.textContent = `✨ ${greetingData.quote}`;
     }
     
@@ -174,6 +177,69 @@
         if (timerDisplay) {
             timerDisplay.textContent = formatTimerDisplay(state.timer.remainingSeconds);
         }
+    }
+
+    /**
+     * Tampilkan Modal Custom untuk Input/Edit Nama Pengguna
+     */
+    function showNameModal(titleText, initialValue, onSave) {
+        const existingModal = document.getElementById("custom-name-modal");
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "custom-name-modal";
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); display: flex; align-items: center;
+            justify-content: center; z-index: 9999; backdrop-filter: blur(4px);
+        `;
+
+        modal.innerHTML = `
+            <div style="background: #ffffff; padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid var(--primary); animation: fadeIn 0.3s ease;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; font-family: var(--font-heading); color: #333;">✨ ${titleText}</h3>
+                <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Masukkan nama kamu agar dashboard terasa lebih personal!</p>
+                
+                <div class="modal-input-group" style="margin-bottom: 1rem;">
+                    <input type="text" id="modal-user-name" value="${escapeHtml(initialValue)}" placeholder="Nama kamu..." style="text-align: center; font-size: 1rem; font-weight: 600;">
+                    <div id="modal-name-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: none;">⚠️ Nama tidak boleh kosong!</div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="save-name-modal" class="btn add" style="width: 100%; padding: 0.7rem;">Simpan Nama</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const nameInput = document.getElementById("modal-user-name");
+        const errorEl = document.getElementById("modal-name-error");
+
+        if (nameInput) {
+            nameInput.focus();
+            nameInput.select();
+            
+            // Sembunyikan pesan error saat pengguna mulai mengetik ulang
+            nameInput.addEventListener("input", () => {
+                if (errorEl) errorEl.style.display = "none";
+            });
+        }
+
+        const handleSave = () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                onSave(name);
+                modal.remove();
+            } else if (errorEl) {
+                // Tampilkan pesan error langsung di dalam popup modal
+                errorEl.style.display = "block";
+            }
+        };
+
+        document.getElementById("save-name-modal").addEventListener("click", handleSave);
+        nameInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleSave();
+        });
     }
 
     /**
@@ -598,7 +664,8 @@
         try {
             const data = {
                 todos: state.todos,
-                quickLinks: state.quickLinks
+                quickLinks: state.quickLinks,
+                userName: state.userName // save user name
             };
             localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
         } catch (error) {
@@ -616,6 +683,7 @@
                 const data = JSON.parse(saved);
                 state.todos = data.todos || [];
                 state.quickLinks = data.quickLinks || [];
+                state.userName = data.userName || "Friend";
             }
         } catch (error) {
             console.error("Failed to load from Local Storage:", error);
@@ -765,6 +833,18 @@
         const customTimerInput = document.getElementById("custom-timer-input");
         const minInput = document.getElementById("custom-minutes-input");
         const secInput = document.getElementById("custom-seconds-input");
+        const userNameEl = document.getElementById("user-name");
+        
+        if (userNameEl) {
+            userNameEl.addEventListener("click", () => {
+                showNameModal("Ubah Nama Kamu", state.userName, (newName) => {
+                    state.userName = newName;
+                    saveState();
+                    updateGreeting();
+                    showSuccess("Nama berhasil diperbarui!", "greeting-text");
+                });
+            });
+        }
         
         if (startBtn) startBtn.addEventListener("click", startTimer);
         if (stopBtn) stopBtn.addEventListener("click", stopTimer);
@@ -844,8 +924,19 @@
     function init() {
         // Load saved state
         loadState();
+
+        // Jika nama masih default/kosong saat pertama masuk website, munculkan modal nama
+        if (!localStorage.getItem(CONFIG.STORAGE_KEY) || state.userName === "Friend") {
+            setTimeout(() => {
+                showNameModal("Selamat Datang! 👋", "", (newName) => {
+                    state.userName = newName;
+                    saveState();
+                    updateGreeting();
+                });
+            }, 400);
+        }
         
-        // Set up initial displays & reset timer sesuai input menit/detik
+        // Set up initial displays & reset timer
         updateGreeting();
         resetTimer();
         
