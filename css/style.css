@@ -505,6 +505,38 @@ footer {
     transform: scale(1.15) !important;
 }
 
+.link-edit {
+    position: absolute;
+    top: -8px;
+    right: 18px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #003366;
+    border: none;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.link-item:hover .link-edit {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.link-edit:hover {
+    background: #74c0fc;
+    transform: scale(1.15) !important;
+}
+
 /* Modal Input Group */
 .modal-input-group {
     display: flex;

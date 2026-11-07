@@ -943,16 +943,54 @@
             </div>`;
             return;
         }
-        
-        container.innerHTML = state.quickLinks.map(link => `
-            <div class="link-item" data-id="${link.id}">
-                <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-button">
-                    <span>🌐</span>
-                    <span class="link-name">${escapeHtml(link.name)}</span>
-                </a>
-                <button class="link-delete" title="Delete link">✖</button>
-            </div>
-        `).join("");
+
+        // Helper function to extract website favicon using Google Favicon API
+        function getFaviconUrl(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Render quick link buttons with real website favicons
+        container.innerHTML = state.quickLinks.map(link => {
+            const faviconUrl = getFaviconUrl(link.url);
+            const iconHtml = faviconUrl 
+                ? `<img src="${faviconUrl}" alt="${escapeHtml(link.name)}" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;">`
+                : `<span>🌐</span>`;
+
+            return `
+                <div class="link-item" data-id="${link.id}">
+                    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-button">
+                        ${iconHtml}
+                        <span class="link-name">${escapeHtml(link.name)}</span>
+                    </a>
+                    <button class="link-edit" title="Edit Link">✏️</button>
+                    <button class="link-delete" title="Delete link">✖</button>
+                </div>
+            `;
+        }).join("");
+
+        // Add event listeners for edit buttons
+        container.querySelectorAll(".link-edit").forEach(button => {
+            button.addEventListener("click", (e) => {
+                e.preventDefault();
+                const linkItem = e.target.closest(".link-item");
+                const id = linkItem.dataset.id;
+                const link = state.quickLinks.find(l => l.id === id);
+                if (!link) return;
+
+                showEditLinkModal(link.name, link.url, (newName, newUrl) => {
+                    link.name = newName;
+                    link.url = newUrl;
+                    saveState();
+                    renderQuickLinks();
+                    showSuccess("Link updated successfully!", "add-link");
+                });
+            });
+        });
         
         // Add event listeners for delete buttons with confirmation modal
         container.querySelectorAll(".link-delete").forEach((button, index) => {
@@ -965,6 +1003,72 @@
                     () => deleteQuickLink(linkId)
                 );
             });
+        });
+    }
+
+    /**
+     * Display Custom Modal for Editing a Quick Link
+     * @param {string} initialName Current link name
+     * @param {string} initialUrl Current link URL
+     * @param {function} onSave Callback function executed on save
+     */
+    function showEditLinkModal(initialName, initialUrl, onSave) {
+        const existingModal = document.getElementById("custom-edit-link-modal");
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "custom-edit-link-modal";
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); display: flex; align-items: center;
+            justify-content: center; z-index: 9999; backdrop-filter: blur(4px);
+        `;
+
+        modal.innerHTML = `
+            <div style="background: var(--modal-bg, #ffffff); padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid #ffd166; animation: fadeIn 0.3s ease;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; font-family: var(--font-heading); color: var(--text);">✏️ Edit Quick Link</h3>
+                
+                <div class="modal-input-group">
+                    <label for="modal-edit-link-name">Website Name</label>
+                    <input type="text" id="modal-edit-link-name" value="${escapeHtml(initialName)}" placeholder="e.g. Google, GitHub">
+                    
+                    <label for="modal-edit-link-url">Website URL</label>
+                    <input type="text" id="modal-edit-link-url" value="${escapeHtml(initialUrl)}" placeholder="e.g. google.com">
+                </div>
+
+                <div class="modal-actions">
+                    <button id="cancel-edit-link-modal" class="btn reset" style="background: #e2e8f0; color: #475569;">Cancel</button>
+                    <button id="save-edit-link-modal" class="btn add" style="background: #ffd166; color: #78350f;">Save Changes</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const nameInput = document.getElementById("modal-edit-link-name");
+        const urlInput = document.getElementById("modal-edit-link-url");
+        if (nameInput) {
+            nameInput.focus();
+            nameInput.select();
+        }
+
+        const closeModal = () => modal.remove();
+
+        document.getElementById("cancel-edit-link-modal").addEventListener("click", closeModal);
+
+        document.getElementById("save-edit-link-modal").addEventListener("click", () => {
+            const name = nameInput.value.trim();
+            let url = urlInput.value.trim();
+            
+            if (name && url) {
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
+                onSave(name, url);
+                closeModal();
+            } else {
+                showError("Name and URL cannot be empty!", "add-link");
+            }
         });
     }
     
@@ -1269,9 +1373,9 @@
             });
         }
 
-        // Keyboard Shortcuts Listener (Esc & Space)
+        // Global Keyboard Shortcuts Listener (Esc & Spacebar)
         document.addEventListener("keydown", (e) => {
-            // Press ESC to exit Focus Overlay or close open modals
+            // Press Escape to exit Focus Overlay or dismiss active modals
             if (e.key === "Escape") {
                 const focusOverlay = document.getElementById("focus-overlay");
                 if (focusOverlay && focusOverlay.classList.contains("active")) {
@@ -1279,7 +1383,7 @@
                 }
             }
 
-            // Press Spacebar to Pause/Resume while inside Focus Overlay
+            // Press Spacebar to toggle Pause/Resume inside Focus Overlay
             if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
                 const focusOverlay = document.getElementById("focus-overlay");
                 if (focusOverlay && focusOverlay.classList.contains("active")) {
