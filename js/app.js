@@ -17,6 +17,7 @@
         todos: [],
         quickLinks: [],
         userName: "Friend", // default name
+        theme: "light", // default theme
         currentSort: "newest",
         timer: {
             isRunning: false,
@@ -24,6 +25,26 @@
             intervalId: null
         }
     };
+
+    /**
+     * Terapkan tema (light/dark) ke atribut HTML dan perbarui ikon tombol
+     */
+    function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        const themeBtn = document.getElementById("theme-toggle");
+        if (themeBtn) {
+            themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+        }
+    }
+
+    /**
+     * Ganti tema antara light dan dark
+     */
+    function toggleTheme() {
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        saveState();
+        applyTheme(state.theme);
+    }
     
     // ======================
     // 2.2 Time Formatting Functions
@@ -685,7 +706,8 @@
             const data = {
                 todos: state.todos,
                 quickLinks: state.quickLinks,
-                userName: state.userName // save user name
+                userName: state.userName, // save user name
+                theme: state.theme
             };
             localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
         } catch (error) {
@@ -704,6 +726,7 @@
                 state.todos = data.todos || [];
                 state.quickLinks = data.quickLinks || [];
                 state.userName = data.userName || "Friend";
+                state.theme = data.theme || "light";
             }
         } catch (error) {
             console.error("Failed to load from Local Storage:", error);
@@ -864,6 +887,11 @@
         const secInput = document.getElementById("custom-seconds-input");
         const userNameEl = document.getElementById("user-name");
         const sortSelect = document.getElementById("sort-select");
+        const themeToggleBtn = document.getElementById("theme-toggle");
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener("click", toggleTheme);
+        }
         
         if (userNameEl) {
             userNameEl.addEventListener("click", () => {
@@ -973,6 +1001,9 @@
                 });
             }, 400);
         }
+
+        // Terapkan tema yang tersimpan
+        applyTheme(state.theme);
         
         // Set up initial displays & reset timer
         updateGreeting();

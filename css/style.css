@@ -1,33 +1,54 @@
 /* To-Do List Life Dashboard - Cute & Playful Design */
+
+/* ==========================================
+   THEME VARIABLES (LIGHT & DARK MODE)
+   ========================================== */
 :root {
-    /* Color Palette - Soft & Playful */
-    --primary: #a3d9ff;
-    --secondary: #ffb6c1;
-    --accent: #b5e8d9;
-    --background: #f9f7ff;
+    --bg-gradient: linear-gradient(135deg, #fff5f7 0%, #f0f4ff 100%);
     --card-bg: #ffffff;
-    --text: #333333;
-    --text-light: #666666;
-    --shadow: rgba(0, 0, 0, 0.1);
+    --text: #2d3748;
+    --text-light: #718096;
+    --border-color: #edf2f7;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     
-    /* Typography */
-    --font-heading: "Quicksand", sans-serif;
-    --font-body: "Poppins", sans-serif;
-    
+    --primary: #a3d9ff;
+    --secondary: #ffb7b2;
+    --accent: #ffd166;
+    --input-bg: #ffffff;
+    --modal-bg: #ffffff;
+
+    /* Font Families */
+    --font-heading: 'Quicksand', sans-serif;
+    --font-body: 'Poppins', sans-serif;
+
     /* Spacing */
     --spacing-xs: 0.5rem;
-    --spacing-sm: 1rem;
-    --spacing-md: 1.5rem;
-    --spacing-lg: 2rem;
-    --spacing-xl: 3rem;
-    
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+
     /* Border Radius */
-    --radius-sm: 12px;
-    --radius-md: 20px;
-    --radius-lg: 30px;
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
 }
 
-/* Fixed selector from '-' to '*' */
+[data-theme="dark"] {
+    --bg-gradient: linear-gradient(135deg, #1a1b26 0%, #16161e 100%);
+    --card-bg: #24283b;
+    --text: #c0caf5;
+    --text-light: #9aa5ce;
+    --border-color: #414868;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    
+    --primary: #3d59a1;
+    --secondary: #f7768e;
+    --accent: #e0af68;
+    --input-bg: #1f2335;
+    --modal-bg: #24283b;
+}
+
+/* Universal Reset Fixed from '-' to '*' */
 * {
     margin: 0;
     padding: 0;
@@ -35,12 +56,12 @@
 }
 
 body {
-    font-family: var(--font-body);
-    background: var(--background);
+    background: var(--bg-gradient);
     color: var(--text);
-    line-height: 1.6;
-    padding: var(--spacing-md);
+    font-family: var(--font-body);
+    transition: background 0.3s ease, color 0.3s ease;
     min-height: 100vh;
+    padding: var(--spacing-lg) var(--spacing-md);
 }
 
 .dashboard {
@@ -53,13 +74,14 @@ body {
 
 .title {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     text-align: center;
     color: var(--text);
     padding: var(--spacing-md);
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: var(--card-bg);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 20px var(--shadow);
+    box-shadow: var(--shadow);
+    border: 2px solid var(--primary);
 }
 
 /* Grid & Layout Structure */
@@ -69,7 +91,7 @@ body {
 
 .grid-middle {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: var(--spacing-lg);
 }
 
@@ -77,8 +99,8 @@ body {
     background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: var(--spacing-lg);
-    box-shadow: 0 6px 15px var(--shadow);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
     border: 2px solid transparent;
     display: flex;
     flex-direction: column;
@@ -86,12 +108,12 @@ body {
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 25px var(--shadow);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 .card h2 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-bottom: var(--spacing-md);
     color: var(--text);
     display: flex;
@@ -103,6 +125,25 @@ body {
     font-size: 1.3rem;
 }
 
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    font-size: 1.2rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
 /* Greeting Card Specifics */
 .greeting {
     border-color: var(--primary);
@@ -110,7 +151,7 @@ body {
 }
 
 .time-display {
-    font-size: 3.8rem;
+    font-size: 3.5rem;
     font-weight: 700;
     color: var(--text);
     margin: var(--spacing-xs) 0;
@@ -125,18 +166,18 @@ body {
 }
 
 .greeting-text {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     color: #ff6b81;
     font-weight: 700;
     font-family: var(--font-heading);
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
 }
 
 .quote-subtext {
     font-size: 0.95rem;
     color: var(--text-light);
     font-style: italic;
-    margin-top: 0.3rem;
+    margin-top: 0.4rem;
 }
 
 .editable-name {
@@ -148,7 +189,7 @@ body {
 
 .editable-name:hover {
     color: var(--primary);
-    background: rgba(163, 217, 255, 0.15);
+    background: rgba(163, 217, 255, 0.2);
     border-radius: 6px;
 }
 
@@ -158,10 +199,10 @@ body {
 }
 
 .timer-display {
-    font-size: 4rem;
+    font-size: 3.8rem;
     font-weight: 700;
     text-align: center;
-    margin: var(--spacing-md) 0;
+    margin: var(--spacing-sm) 0;
     font-family: var(--font-heading);
     color: var(--text);
 }
@@ -177,11 +218,11 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
 }
 
 .timer-input-group input {
-    width: 60px;
+    width: 65px;
     padding: 0.4rem;
     border: 2px solid var(--accent);
     border-radius: var(--radius-sm);
@@ -189,6 +230,8 @@ body {
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 600;
+    background: var(--input-bg);
+    color: var(--text);
 }
 
 .timer-input-group input:focus {
@@ -215,14 +258,14 @@ body {
 }
 
 .todo-header h2 {
-    margin-bottom: 0; /* Menghilangkan margin bawah bawaan h2 */
+    margin-bottom: 0;
 }
 
 .todo-input {
     display: flex;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
-    align-items: stretch; /* Memastikan tinggi input dan tombol sejajar sempurna */
+    align-items: stretch;
 }
 
 .todo-input input {
@@ -232,6 +275,13 @@ body {
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 0.95rem;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.todo-input input:focus {
+    outline: none;
+    border-color: var(--secondary);
 }
 
 .todo-input .btn.add {
@@ -251,7 +301,7 @@ body {
     font-family: var(--font-body);
     font-size: 0.85rem;
     font-weight: 500;
-    background: #ffffff;
+    background: var(--card-bg);
     color: var(--text);
     cursor: pointer;
     outline: none;
@@ -262,32 +312,27 @@ body {
     border-color: var(--secondary);
 }
 
-/* Links Card */
-.links {
-    border-color: #ffd166;
-}
-
 /* Buttons */
 .btn {
     padding: var(--spacing-sm) var(--spacing-md);
     border: none;
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+    transition: all 0.25s ease;
+    font-size: 0.95rem;
 }
 
-.start { background: var(--accent); color: var(--text); }
+.start { background: var(--accent); color: #5c3d00; }
 .stop { background: var(--secondary); color: white; }
-.reset { background: #ffeaa7; color: var(--text); }
-.add { background: var(--primary); color: var(--text); }
-.add-link { background: #ffd166; color: var(--text); width: 100%; margin-bottom: var(--spacing-md); }
+.reset { background: #e2e8f0; color: #475569; }
+.add { background: var(--primary); color: #003366; }
+.add-link { background: #ffd166; color: #5c3d00; width: 100%; margin-bottom: var(--spacing-md); }
 
 .btn:hover {
     opacity: 0.9;
-    transform: scale(1.03);
+    transform: translateY(-2px);
 }
 
 .btn:disabled {
@@ -310,32 +355,31 @@ footer {
     align-items: center;
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-xs);
-    background: #f8f9fa;
+    background: var(--bg-gradient);
     border-radius: var(--radius-sm);
     border-left: 4px solid var(--primary);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .todo-item:hover {
-    background: #e9ecef;
     transform: translateX(3px);
 }
 
 .todo-item.completed {
-    opacity: 0.7;
-    border-left-color: #6c757d;
+    opacity: 0.6;
+    border-left-color: var(--text-light);
 }
 
 .todo-checkbox {
     margin-right: var(--spacing-sm);
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     cursor: pointer;
 }
 
 .todo-text {
     flex: 1;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .todo-item.completed .todo-text {
@@ -348,7 +392,7 @@ footer {
     border: none;
     color: #ff6b6b;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     padding: 0 var(--spacing-xs);
     transition: transform 0.2s;
 }
@@ -363,7 +407,7 @@ footer {
     color: var(--text-light);
     font-style: italic;
     width: 100%;
-    grid-column: 1 / -1; /* Mengambil seluruh lebar baris grid */
+    grid-column: 1 / -1;
 }
 
 /* Quick Links Grid */
@@ -391,7 +435,7 @@ footer {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.85rem 1rem;
-    background: #ffffff;
+    background: var(--card-bg);
     color: var(--text);
     text-decoration: none;
     border-radius: var(--radius-sm);
@@ -407,7 +451,6 @@ footer {
 
 .link-button:hover {
     transform: translateY(-4px);
-    background: linear-gradient(135deg, #fffbeb, #ffeaa7);
     border-color: #ffd166;
     box-shadow: 0 8px 20px rgba(255, 209, 102, 0.35);
 }
@@ -417,7 +460,6 @@ footer {
     text-overflow: ellipsis;
 }
 
-/* Tombol Hapus Melayang Cute */
 .link-delete {
     position: absolute;
     top: -8px;
@@ -450,9 +492,7 @@ footer {
     transform: scale(1.15) !important;
 }
 
-/* ==========================================
-   CUSTOM MODAL ADD LINK INPUT
-   ========================================== */
+/* Modal Input Group */
 .modal-input-group {
     display: flex;
     flex-direction: column;
@@ -476,6 +516,8 @@ footer {
     font-family: var(--font-body);
     font-size: 0.95rem;
     outline: none;
+    background: var(--input-bg);
+    color: var(--text);
 }
 
 .modal-input-group input:focus {

@@ -13,15 +13,18 @@
     <div class="dashboard">
         <h1 class="title">✨ To-Do List Life Dashboard</h1>
         
-        <!-- Top Section: Time & Greeting (Paling Atas & Full Width) -->
-        <div class="card greeting full-width">
+        <!-- Top Section: Time & Greeting -->
+        <div class="card greeting full-width" style="position: relative;">
+            <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme" style="position: absolute; top: 1rem; right: 1rem;">
+                🌙
+            </button>
             <h2><span class="icon">⏰</span> Time & Greeting</h2>
-            <div class="time-display" id="current-time">--:--:--</div>
-            <div class="date-display" id="current-date">Loading date...</div>
             <div class="greeting-text">
                 <span id="greeting-title">Hello</span>, 
-                <span id="user-name" class="editable-name" title="Klik untuk ubah nama">User</span>! ✏️
+                <span id="user-name" class="editable-name" title="Click to edit name">User</span>! ✏️
             </div>
+            <div class="time-display" id="current-time">--:--:--</div>
+            <div class="date-display" id="current-date">Loading date...</div>
             <div class="quote-subtext" id="quote-subtext">✨ Make today count!</div>
         </div>
         
@@ -67,7 +70,7 @@
             </div>
         </div>
         
-        <!-- Bottom Section: Quick Links (Paling Bawah) -->
+        <!-- Bottom Section: Quick Links -->
         <div class="card links full-width">
             <h2><span class="icon">🔗</span> Quick Links</h2>
             <button class="btn add-link" id="add-link">+ Add Link</button>
