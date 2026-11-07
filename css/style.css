@@ -1,5 +1,18 @@
 /* To-Do List Life Dashboard - Cute & Playful Design */
 
+/* Universal Reset Fixed (* instead of -) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden; /* Prevents horizontal scroll on mobile */
+}
+
 /* ==========================================
    THEME VARIABLES (LIGHT & DARK MODE)
    ========================================== */
@@ -48,13 +61,6 @@
     --modal-bg: #24283b;
 }
 
-/* Universal Reset Fixed from '-' to '*' */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     background: var(--bg-gradient);
     color: var(--text);
@@ -70,6 +76,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    width: 100%;
 }
 
 .title {
@@ -82,6 +89,7 @@ body {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     border: 2px solid var(--primary);
+    width: 100%;
 }
 
 /* Grid & Layout Structure */
@@ -91,8 +99,9 @@ body {
 
 .grid-middle {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-lg);
+    width: 100%;
 }
 
 .card {
@@ -104,6 +113,8 @@ body {
     border: 2px solid transparent;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-width: 0; /* Prevents child flex/grid items from overflowing card */
 }
 
 .card:hover {
@@ -211,6 +222,7 @@ body {
     display: flex;
     gap: var(--spacing-sm);
     justify-content: center;
+    width: 100%;
 }
 
 .timer-input-group {
@@ -219,10 +231,11 @@ body {
     justify-content: center;
     gap: 0.4rem;
     margin-bottom: 1.2rem;
+    flex-wrap: wrap;
 }
 
 .timer-input-group input {
-    width: 65px;
+    width: 60px;
     padding: 0.4rem;
     border: 2px solid var(--accent);
     border-radius: var(--radius-sm);
@@ -243,6 +256,22 @@ body {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-light);
+}
+
+.timer-presets {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.preset-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    flex: 1 1 auto;
+    min-width: 65px;
 }
 
 /* To-Do Card */
@@ -270,6 +299,7 @@ body {
 
 .todo-input input {
     flex: 1;
+    min-width: 0;
     padding: 0.6rem 0.9rem;
     border: 2px solid var(--primary);
     border-radius: var(--radius-sm);
@@ -379,6 +409,8 @@ footer {
 
 .todo-text {
     flex: 1;
+    min-width: 0;
+    word-break: break-word;
     font-size: 0.95rem;
 }
 
@@ -387,21 +419,7 @@ footer {
     color: var(--text-light);
 }
 
-.todo-delete {
-    background: transparent;
-    border: none;
-    color: #ff6b6b;
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 0 var(--spacing-xs);
-    transition: transform 0.2s;
-}
-
-.todo-delete:hover {
-    transform: scale(1.2);
-}
-
-.todo-edit {
+.todo-delete, .todo-edit {
     background: transparent;
     border: none;
     cursor: pointer;
@@ -410,9 +428,8 @@ footer {
     transition: transform 0.2s ease;
 }
 
-.todo-edit:hover {
-    transform: scale(1.2);
-}
+.todo-delete { color: #ff6b6b; }
+.todo-delete:hover, .todo-edit:hover { transform: scale(1.2); }
 
 .todo-empty, .link-empty {
     text-align: center;
@@ -430,8 +447,8 @@ footer {
 
 .links-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.8rem;
     width: 100%;
 }
 
@@ -439,6 +456,7 @@ footer {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .link-button {
@@ -446,20 +464,21 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.85rem 1rem;
+    gap: 0.4rem;
+    padding: 0.75rem 0.8rem;
     background: var(--card-bg);
     color: var(--text);
     text-decoration: none;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     border: 2px solid rgba(255, 209, 102, 0.4);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .link-button:hover {
@@ -473,68 +492,43 @@ footer {
     text-overflow: ellipsis;
 }
 
-.link-delete {
+.link-delete, .link-edit {
     position: absolute;
     top: -8px;
-    right: -8px;
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: #ff6b6b;
-    color: white;
     border: none;
     font-size: 0.75rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
     opacity: 0;
     transform: scale(0.8);
     transition: all 0.2s ease;
     z-index: 2;
 }
 
-.link-item:hover .link-delete {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.link-delete:hover {
-    background: #ee5253;
-    transform: scale(1.15) !important;
+.link-delete {
+    right: -8px;
+    background: #ff6b6b;
+    color: white;
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
 }
 
 .link-edit {
-    position: absolute;
-    top: -8px;
     right: 18px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
     background: var(--primary);
     color: #003366;
-    border: none;
     font-size: 0.7rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    opacity: 0;
-    transform: scale(0.8);
-    transition: all 0.2s ease;
-    z-index: 2;
 }
 
+.link-item:hover .link-delete,
 .link-item:hover .link-edit {
     opacity: 1;
     transform: scale(1);
-}
-
-.link-edit:hover {
-    background: #74c0fc;
-    transform: scale(1.15) !important;
 }
 
 /* Modal Input Group */
@@ -578,29 +572,6 @@ footer {
     flex: 1;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .grid-middle {
-        grid-template-columns: 1fr;
-    }
-    
-    .title {
-        font-size: 1.8rem;
-    }
-    
-    .time-display {
-        font-size: 2.8rem;
-    }
-    
-    .timer-display {
-        font-size: 3rem;
-    }
-    
-    .timer-controls {
-        flex-direction: column;
-    }
-}
-
 /* ==========================================
    FULL-SCREEN FOCUS OVERLAY
    ========================================== */
@@ -633,9 +604,9 @@ footer {
     border-radius: var(--radius-lg);
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
     text-align: center;
-    max-width: 900px; /* Diperbesar dari 550px agar jauh lebih lebar */
-    width: 92vw;      /* Menyesuaikan 92% lebar layar */
-    min-height: 82vh; /* Dibuat tinggi hingga 82% area layar */
+    max-width: 900px;
+    width: 92vw;
+    min-height: 82vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -668,14 +639,14 @@ footer {
 
 .focus-greeting {
     font-family: var(--font-heading);
-    font-size: 2.2rem; /* Diperbesar */
+    font-size: 2.2rem;
     font-weight: 700;
     color: var(--secondary);
     margin-bottom: 0.5rem;
 }
 
 .focus-timer-display {
-    font-size: 9.5rem; /* Angka diperbesar ekstra raksasa */
+    font-size: 9.5rem;
     font-weight: 700;
     font-family: var(--font-heading);
     color: var(--text);
@@ -709,13 +680,60 @@ footer {
     to { transform: scale(1); opacity: 1; }
 }
 
+/* ==========================================
+   MOBILE RESPONSIVE BREAKPOINTS (MAX-WIDTH 768PX)
+   ========================================== */
 @media (max-width: 768px) {
-    .focus-overlay-content {
-        min-height: 90vh;
-        padding: 2.5rem 1.5rem;
+    body {
+        padding: 0.8rem 0.5rem;
     }
-    
+
+    .grid-middle {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .title {
+        font-size: 1.6rem;
+        padding: 0.8rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .time-display {
+        font-size: 2.5rem;
+    }
+
+    .timer-display {
+        font-size: 2.8rem;
+    }
+
+    .timer-controls {
+        flex-direction: column;
+    }
+
+    .timer-controls .btn {
+        width: 100%;
+    }
+
+    .focus-overlay-content {
+        min-height: 88vh;
+        padding: 2.5rem 1rem;
+        width: 95vw;
+    }
+
     .focus-timer-display {
-        font-size: 5.5rem;
+        font-size: 4.8rem;
+    }
+
+    .focus-greeting {
+        font-size: 1.5rem;
+    }
+
+    .focus-controls {
+        flex-direction: column;
+        width: 100%;
     }
 }
