@@ -1,5 +1,9 @@
 # To-Do List Life Dashboard ✨
 
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?logo=github)](https://sirly82.github.io/dashboard-mini-project/)
+
+> 🌐 **Live Demo:** [Click here to launch the dashboard](https://sirly82.github.io/dashboard-mini-project/)
+
 A modern, responsive, and feature-rich daily dashboard built with Vanilla JavaScript. Designed to help users stay productive through smart task management, an immersive full-screen Pomodoro focus timer, and quick navigation shortcuts—all saved locally in the browser.
 
 ---
@@ -82,8 +86,13 @@ A modern, responsive, and feature-rich daily dashboard built with Vanilla JavaSc
 
 ---
 
-## 🚀 How to Run
+## 🚀 How to Run & Live Access
 
+### Option 1: Live Demo (Recommended)
+Directly access the live deployed dashboard at:  
+👉 **[https://sirly82.github.io/dashboard-mini-project/](https://sirly82.github.io/dashboard-mini-project/)**
+
+### Option 2: Local Setup
 1. Clone or download this repository.
 2. Open `index.html` directly in any modern web browser (Chrome, Firefox, Safari, Edge).
 3. All user data, custom preferences, tasks, and quick links will automatically save to your browser's local storage.
