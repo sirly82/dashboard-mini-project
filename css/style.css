@@ -1,0 +1,473 @@
+/* To-Do List Life Dashboard - Cute & Playful Design */
+:root {
+    /* Color Palette - Soft & Playful */
+    --primary: #a3d9ff;
+    --secondary: #ffb6c1;
+    --accent: #b5e8d9;
+    --background: #f9f7ff;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --text-light: #666666;
+    --shadow: rgba(0, 0, 0, 0.1);
+    
+    /* Typography */
+    --font-heading: "Quicksand", sans-serif;
+    --font-body: "Poppins", sans-serif;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 30px;
+}
+
+/* Fixed selector from '-' to '*' */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+    padding: var(--spacing-md);
+    min-height: 100vh;
+}
+
+.dashboard {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    text-align: center;
+    color: var(--text);
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 20px var(--shadow);
+}
+
+/* Grid & Layout Structure */
+.full-width {
+    width: 100%;
+}
+
+.grid-middle {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: 0 6px 15px var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px var(--shadow);
+}
+
+.card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.icon {
+    font-size: 1.3rem;
+}
+
+/* Greeting Card Specifics */
+.greeting {
+    border-color: var(--primary);
+    text-align: center;
+}
+
+.time-display {
+    font-size: 3.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: var(--spacing-xs) 0;
+    font-family: var(--font-heading);
+    letter-spacing: 2px;
+}
+
+.date-display {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: var(--spacing-xs);
+}
+
+.greeting-text {
+    font-size: 1.6rem;
+    color: #ff6b81;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    margin-top: 0.5rem;
+}
+
+.quote-subtext {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 0.3rem;
+}
+
+/* Timer Card */
+.timer {
+    border-color: var(--accent);
+}
+
+.timer-display {
+    font-size: 4rem;
+    font-weight: 700;
+    text-align: center;
+    margin: var(--spacing-md) 0;
+    font-family: var(--font-heading);
+    color: var(--text);
+}
+
+.timer-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.timer-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.timer-input-group input {
+    width: 60px;
+    padding: 0.4rem;
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.timer-input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.timer-input-group span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+/* To-Do Card */
+.todo {
+    border-color: var(--secondary);
+}
+
+.todo-input {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    align-items: stretch; /* Memastikan tinggi input dan tombol sejajar sempurna */
+}
+
+.todo-input input {
+    flex: 1;
+    padding: 0.6rem 0.9rem;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+}
+
+.todo-input .btn.add {
+    padding: 0 1.2rem;
+    white-space: nowrap;
+}
+
+.todo-items {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* Links Card */
+.links {
+    border-color: #ffd166;
+}
+
+/* Buttons */
+.btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.start { background: var(--accent); color: var(--text); }
+.stop { background: var(--secondary); color: white; }
+.reset { background: #ffeaa7; color: var(--text); }
+.add { background: var(--primary); color: var(--text); }
+.add-link { background: #ffd166; color: var(--text); width: 100%; margin-bottom: var(--spacing-md); }
+
+.btn:hover {
+    opacity: 0.9;
+    transform: scale(1.03);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: var(--spacing-md);
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Todo Items */
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s ease;
+}
+
+.todo-item:hover {
+    background: #e9ecef;
+    transform: translateX(3px);
+}
+
+.todo-item.completed {
+    opacity: 0.7;
+    border-left-color: #6c757d;
+}
+
+.todo-checkbox {
+    margin-right: var(--spacing-sm);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1rem;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: var(--text-light);
+}
+
+.todo-delete {
+    background: transparent;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0 var(--spacing-xs);
+    transition: transform 0.2s;
+}
+
+.todo-delete:hover {
+    transform: scale(1.2);
+}
+
+.todo-empty, .link-empty {
+    text-align: center;
+    padding: var(--spacing-md);
+    color: var(--text-light);
+    font-style: italic;
+    width: 100%;
+    grid-column: 1 / -1; /* Mengambil seluruh lebar baris grid */
+}
+
+/* Quick Links Grid */
+.links {
+    border-color: #ffd166;
+}
+
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    width: 100%;
+}
+
+.link-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.link-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: #ffffff;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 2px solid rgba(255, 209, 102, 0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.link-button:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(135deg, #fffbeb, #ffeaa7);
+    border-color: #ffd166;
+    box-shadow: 0 8px 20px rgba(255, 209, 102, 0.35);
+}
+
+.link-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tombol Hapus Melayang Cute */
+.link-delete {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.link-item:hover .link-delete {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.link-delete:hover {
+    background: #ee5253;
+    transform: scale(1.15) !important;
+}
+
+/* ==========================================
+   CUSTOM MODAL ADD LINK INPUT
+   ========================================== */
+.modal-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.modal-input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: -0.4rem;
+}
+
+.modal-input-group input {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.modal-input-group input:focus {
+    border-color: var(--secondary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grid-middle {
+        grid-template-columns: 1fr;
+    }
+    
+    .title {
+        font-size: 1.8rem;
+    }
+    
+    .time-display {
+        font-size: 2.8rem;
+    }
+    
+    .timer-display {
+        font-size: 3rem;
+    }
+    
+    .timer-controls {
+        flex-direction: column;
+    }
+}

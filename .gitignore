@@ -1,0 +1,6 @@
+# Kiro editor folder
+.kiro/
+
+# OS / System files
+.DS_Store
+Thumbs.db
