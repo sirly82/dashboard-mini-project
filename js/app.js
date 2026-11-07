@@ -753,61 +753,41 @@
     }
     
     /**
-     * Render all todo items with sorting logic applied
+     * Render all todo items with sorting logic applied & completion counter
      */
     function renderTodos() {
         const container = document.getElementById("todo-items");
         if (!container) return;
-        
+
+        // 1. Calculate task progress statistics
+        const total = state.todos.length;
+        const completed = state.todos.filter(t => t.completed).length;
+
+        // 2. Update todo header title with progress counter
+        const todoHeader = document.querySelector(".todo-header h2");
+        if (todoHeader) {
+            todoHeader.innerHTML = `<span class="icon">📝</span> To-Do List <small style="font-size:0.8rem; font-weight:normal; color:var(--text-light);">(${completed}/${total})</small>`;
+        }
+
         if (state.todos.length === 0) {
             container.innerHTML = `<div class="todo-empty">
                 <p>No tasks yet. Add one above! 📝</p>
             </div>`;
             return;
         }
-        
-        // Create a shallow copy of todos to avoid mutating original state array
+
+        // 3. Create shallow copy & apply sorting logic
         let sortedTodos = [...state.todos];
 
-        // Sorting logic based on selected criterion
         if (state.currentSort === "newest") {
-            sortedTodos.reverse(); // Newest items first
+            sortedTodos.reverse();
         } else if (state.currentSort === "status") {
-            // Uncompleted items first (false), completed items last (true)
             sortedTodos.sort((a, b) => a.completed - b.completed);
         } else if (state.currentSort === "alphabetical") {
             sortedTodos.sort((a, b) => a.text.localeCompare(b.text));
         }
-        // Note: "oldest" keeps original insertion order
 
-        container.innerHTML = sortedTodos.map(todo => `
-            <div class="todo-item ${todo.completed ? "completed" : ""}">
-                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.completed ? "checked" : ""}>
-                <span class="todo-text">${escapeHtml(todo.text)}</span>
-                <button class="todo-delete" data-id="${todo.id}" title="Delete task">🗑️</button>
-            </div>
-        `).join("");
-        
-        // Event listener for completion checkbox
-        container.querySelectorAll(".todo-checkbox").forEach(checkbox => {
-            checkbox.addEventListener("change", (e) => {
-                toggleTodo(e.target.dataset.id);
-            });
-        });
-        
-        // Event listener for delete button (🗑️) with confirmation modal
-        container.querySelectorAll(".todo-delete").forEach(button => {
-            button.addEventListener("click", (e) => {
-                const id = e.target.dataset.id;
-                showConfirmModal(
-                    "Delete Task?",
-                    "Are you sure you want to delete this task?",
-                    () => deleteTodo(id)
-                );
-            });
-        });
-
-        // Render todo items with edit button (.todo-edit) next to delete button (.todo-delete)
+        // 4. Render todo items markup ONCE (including checkbox, text, edit & delete buttons)
         container.innerHTML = sortedTodos.map(todo => `
             <div class="todo-item ${todo.completed ? "completed" : ""}">
                 <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.completed ? "checked" : ""}>
@@ -817,7 +797,14 @@
             </div>
         `).join("");
 
-        // 1. Event listener for Edit button click (✏️)
+        // 5. Event listener for Checkbox (Toggle completion)
+        container.querySelectorAll(".todo-checkbox").forEach(checkbox => {
+            checkbox.addEventListener("change", (e) => {
+                toggleTodo(e.target.dataset.id);
+            });
+        });
+
+        // 6. Event listener for Edit button (✏️)
         container.querySelectorAll(".todo-edit").forEach(button => {
             button.addEventListener("click", (e) => {
                 const id = e.target.dataset.id;
@@ -836,7 +823,7 @@
             });
         });
 
-        // 2. Event listener for double-clicking task text as a quick shortcut
+        // 7. Event listener for double-clicking task text
         container.querySelectorAll(".todo-text").forEach(textSpan => {
             textSpan.addEventListener("dblclick", (e) => {
                 const item = e.target.closest(".todo-item");
@@ -857,15 +844,17 @@
             });
         });
 
-        // Calculate task progress statistics
-        const total = state.todos.length;
-        const completed = state.todos.filter(t => t.completed).length;
-        
-        // Update todo header title with progress counter
-        const todoHeader = document.querySelector(".todo-header h2");
-        if (todoHeader) {
-            todoHeader.innerHTML = `<span class="icon">📝</span> To-Do List <small style="font-size:0.8rem; font-weight:normal; color:var(--text-light);">(${completed}/${total})</small>`;
-        }
+        // 8. Event listener for Delete button (🗑️)
+        container.querySelectorAll(".todo-delete").forEach(button => {
+            button.addEventListener("click", (e) => {
+                const id = e.target.dataset.id;
+                showConfirmModal(
+                    "Delete Task?",
+                    "Are you sure you want to delete this task?",
+                    () => deleteTodo(id)
+                );
+            });
+        });
     }
 
     /**
