@@ -17,6 +17,7 @@
         todos: [],
         quickLinks: [],
         userName: "Friend", // default name
+        currentSort: "newest",
         timer: {
             isRunning: false,
             remainingSeconds: CONFIG.TIMER_DURATION,
@@ -112,22 +113,22 @@
         if (hour >= 5 && hour < 12) {
             return {
                 greeting: "Good Morning! ☀️",
-                quote: "Awali harimu dengan senyuman dan segelas semangat!"
+                quote: "Start your day with a smile and a boost of energy!"
             };
         } else if (hour >= 12 && hour < 17) {
             return {
                 greeting: "Good Afternoon! 🌤️",
-                quote: "Tetap fokus dan konsisten, kamu bergerak lebih dekat ke tujuanmu!"
+                quote: "Stay focused and consistent, you're getting closer to your goals!"
             };
         } else if (hour >= 17 && hour < 21) {
             return {
                 greeting: "Good Evening! 🌆",
-                quote: "Selesaikan tugas hari ini dengan baik, apresiasi usahamu!"
+                quote: "Finish today's tasks well, appreciate your hard work!"
             };
         } else {
             return {
                 greeting: "Good Night! 🌙",
-                quote: "Waktunya mengistirahatkan pikiran. Esok adalah kesempatan baru!"
+                quote: "Time to rest your mind. Tomorrow is a new opportunity!"
             };
         }
     }
@@ -197,15 +198,15 @@
         modal.innerHTML = `
             <div style="background: #ffffff; padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid var(--primary); animation: fadeIn 0.3s ease;">
                 <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; font-family: var(--font-heading); color: #333;">✨ ${titleText}</h3>
-                <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Masukkan nama kamu agar dashboard terasa lebih personal!</p>
+                <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Enter your name to make your dashboard more personal!</p>
                 
                 <div class="modal-input-group" style="margin-bottom: 1rem;">
-                    <input type="text" id="modal-user-name" value="${escapeHtml(initialValue)}" placeholder="Nama kamu..." style="text-align: center; font-size: 1rem; font-weight: 600;">
-                    <div id="modal-name-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: none;">⚠️ Nama tidak boleh kosong!</div>
+                    <input type="text" id="modal-user-name" value="${escapeHtml(initialValue)}" placeholder="Your name..." style="text-align: center; font-size: 1rem; font-weight: 600;">
+                    <div id="modal-name-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: none;">⚠️ Name cannot be empty!</div>
                 </div>
 
                 <div class="modal-actions">
-                    <button id="save-name-modal" class="btn add" style="width: 100%; padding: 0.7rem;">Simpan Nama</button>
+                    <button id="save-name-modal" class="btn add" style="width: 100%; padding: 0.7rem;">Save Name</button>
                 </div>
             </div>
         `;
@@ -219,7 +220,6 @@
             nameInput.focus();
             nameInput.select();
             
-            // Sembunyikan pesan error saat pengguna mulai mengetik ulang
             nameInput.addEventListener("input", () => {
                 if (errorEl) errorEl.style.display = "none";
             });
@@ -231,7 +231,6 @@
                 onSave(name);
                 modal.remove();
             } else if (errorEl) {
-                // Tampilkan pesan error langsung di dalam popup modal
                 errorEl.style.display = "block";
             }
         };
@@ -259,26 +258,25 @@
 
         modal.innerHTML = `
             <div style="background: #ffffff; padding: 1.8rem; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid #ffd166; animation: fadeIn 0.3s ease;">
-                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; font-family: var(--font-heading); color: #333;">🔗 Tambah Quick Link</h3>
+                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; font-family: var(--font-heading); color: #333;">🔗 Add Quick Link</h3>
                 
                 <div class="modal-input-group">
-                    <label for="modal-link-name">Nama Website</label>
-                    <input type="text" id="modal-link-name" placeholder="Contoh: Google, GitHub">
+                    <label for="modal-link-name">Website Name</label>
+                    <input type="text" id="modal-link-name" placeholder="e.g. Google, GitHub">
                     
-                    <label for="modal-link-url">URL Website</label>
-                    <input type="text" id="modal-link-url" placeholder="Contoh: google.com">
+                    <label for="modal-link-url">Website URL</label>
+                    <input type="text" id="modal-link-url" placeholder="e.g. google.com">
                 </div>
 
                 <div class="modal-actions">
-                    <button id="cancel-link-modal" class="btn reset" style="background: #e2e8f0; color: #475569;">Batal</button>
-                    <button id="save-link-modal" class="btn add" style="background: #ffd166; color: #78350f;">+ Simpan</button>
+                    <button id="cancel-link-modal" class="btn reset" style="background: #e2e8f0; color: #475569;">Cancel</button>
+                    <button id="save-link-modal" class="btn add" style="background: #ffd166; color: #78350f;">+ Save Link</button>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
 
-        // Auto focus ke input nama
         const nameInput = document.getElementById("modal-link-name");
         const urlInput = document.getElementById("modal-link-url");
         if (nameInput) nameInput.focus();
@@ -294,7 +292,7 @@
                 onSave(name, url);
                 closeModal();
             } else {
-                showError("Nama dan URL tidak boleh kosong!");
+                showError("Name and URL cannot be empty!", "add-link");
             }
         });
     }
@@ -319,8 +317,8 @@
                 <h3 style="font-size: 1.3rem; margin-bottom: 0.8rem; font-family: var(--font-heading); color: #333;">⚠️ ${title}</h3>
                 <p style="margin-bottom: 1.5rem; color: #666; font-size: 0.95rem;">${message}</p>
                 <div style="display: flex; gap: 0.6rem;">
-                    <button id="cancel-confirm-modal" class="btn reset" style="flex: 1; background: #e2e8f0; color: #475569;">Batal</button>
-                    <button id="ok-confirm-modal" class="btn stop" style="flex: 1; background: #ff6b6b; color: white;">Hapus</button>
+                    <button id="cancel-confirm-modal" class="btn reset" style="flex: 1; background: #e2e8f0; color: #475569;">Cancel</button>
+                    <button id="ok-confirm-modal" class="btn stop" style="flex: 1; background: #ff6b6b; color: white;">Delete</button>
                 </div>
             </div>
         `;
@@ -391,11 +389,11 @@
                     }
                     
                     // Tampilkan modal custom (audio akan terus berputar terus-menerus sampai tombol OK diklik)
-                    showTimerModal("Time is up! Istirahat sejenak atau mulai sesi baru.", () => {
+                    showTimerModal("Time is up! Take a short break or start a new session.", () => {
                         if (audio) {
                             audio.pause();
                             audio.currentTime = 0;
-                            audio.loop = false; // Matikan suara begitu tombol OK diklik
+                            audio.loop = false;
                         }
                     });
                 }
@@ -536,6 +534,28 @@
                 <button class="todo-delete" data-id="${todo.id}" title="Hapus tugas">🗑️</button>
             </div>
         `).join("");
+
+        // Buat salinan array todos agar tidak merusak data asli
+        let sortedTodos = [...state.todos];
+
+        // Logika Pengurutan berdasarkan kriteria terpilih
+        if (state.currentSort === "newest") {
+            sortedTodos.reverse(); // Urutan terbaru di atas
+        } else if (state.currentSort === "status") {
+            // Belum selesai (false) ditaruh di atas, sudah selesai (true) di bawah
+            sortedTodos.sort((a, b) => a.completed - b.completed);
+        } else if (state.currentSort === "alphabetical") {
+            sortedTodos.sort((a, b) => a.text.localeCompare(b.text));
+        }
+        // Catatan: untuk "oldest", menggunakan urutan array asli
+
+        container.innerHTML = sortedTodos.map(todo => `
+            <div class="todo-item ${todo.completed ? "completed" : ""}">
+                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.completed ? "checked" : ""}>
+                <span class="todo-text">${escapeHtml(todo.text)}</span>
+                <button class="todo-delete" data-id="${todo.id}" title="Hapus tugas">🗑️</button>
+            </div>
+        `).join("");
         
         // Event listener untuk checklist completed
         container.querySelectorAll(".todo-checkbox").forEach(checkbox => {
@@ -549,8 +569,8 @@
             button.addEventListener("click", (e) => {
                 const id = e.target.dataset.id;
                 showConfirmModal(
-                    "Hapus Tugas?",
-                    "Apakah kamu yakin ingin menghapus tugas ini?",
+                    "Delete Task?",
+                    "Are you sure you want to delete this task?",
                     () => deleteTodo(id)
                 );
             });
@@ -645,8 +665,8 @@
                 e.preventDefault();
                 const linkId = state.quickLinks[index].id;
                 showConfirmModal(
-                    "Hapus Quick Link?",
-                    "Apakah kamu yakin ingin menghapus link ini?",
+                    "Delete Quick Link?",
+                    "Are you sure you want to delete this quick link?",
                     () => deleteQuickLink(linkId)
                 );
             });
@@ -779,7 +799,9 @@
      * @returns {boolean} True if valid
      */
     function validateTodoInput(text) {
-        if (!text || !text.trim()) {
+        const cleanText = text.trim().toLowerCase();
+
+        if (!cleanText) {
             showError("Task cannot be empty!", "todo-input");
             return false;
         }
@@ -788,7 +810,14 @@
             showError("Task is too long (max 200 characters)", "todo-input");
             return false;
         }
-        
+
+        // CEK DUPLIKAT: Periksa apakah teks sudah ada di dalam state.todos
+        const isDuplicate = state.todos.some(todo => todo.text.trim().toLowerCase() === cleanText);
+        if (isDuplicate) {
+            showError("This task is already in your list!", "todo-input");
+            return false;
+        }
+            
         return true;
     }
 
@@ -834,14 +863,15 @@
         const minInput = document.getElementById("custom-minutes-input");
         const secInput = document.getElementById("custom-seconds-input");
         const userNameEl = document.getElementById("user-name");
+        const sortSelect = document.getElementById("sort-select");
         
         if (userNameEl) {
             userNameEl.addEventListener("click", () => {
-                showNameModal("Ubah Nama Kamu", state.userName, (newName) => {
+                showNameModal("Change Your Name", state.userName, (newName) => {
                     state.userName = newName;
                     saveState();
                     updateGreeting();
-                    showSuccess("Nama berhasil diperbarui!", "greeting-text");
+                    showSuccess("Name updated successfully!", "greeting-text");
                 });
             });
         }
@@ -892,6 +922,14 @@
                 todoInput.style.boxShadow = "";
             });
         }
+
+        // Event listener dropdown pengurutan tugas
+        if (sortSelect) {
+            sortSelect.addEventListener("change", (e) => {
+                state.currentSort = e.target.value;
+                renderTodos();
+            });
+        }
         
         // Quick links with improved interface
         const addLinkBtn = document.getElementById("add-link");
@@ -928,7 +966,7 @@
         // Jika nama masih default/kosong saat pertama masuk website, munculkan modal nama
         if (!localStorage.getItem(CONFIG.STORAGE_KEY) || state.userName === "Friend") {
             setTimeout(() => {
-                showNameModal("Selamat Datang! 👋", "", (newName) => {
+                showNameModal("Welcome! 👋", "", (newName) => {
                     state.userName = newName;
                     saveState();
                     updateGreeting();

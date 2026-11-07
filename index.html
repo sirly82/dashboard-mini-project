@@ -48,7 +48,15 @@
             
             <!-- To-Do List Card -->
             <div class="card todo">
-                <h2><span class="icon">📝</span> To-Do List</h2>
+                <div class="todo-header">
+                    <h2><span class="icon">📝</span> To-Do List</h2>
+                    <select id="sort-select" class="sort-select" title="Sort Tasks">
+                        <option value="newest">🆕 Newest</option>
+                        <option value="oldest">⏳ Oldest</option>
+                        <option value="status">📌 Uncompleted</option>
+                        <option value="alphabetical">🔤 Alphabetical (A-Z)</option>
+                    </select>
+                </div>
                 <div class="todo-input">
                     <input type="text" id="todo-input" placeholder="What needs to be done?">
                     <button class="btn add" id="add-todo">+ Add</button>

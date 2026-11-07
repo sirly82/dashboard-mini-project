@@ -207,6 +207,17 @@ body {
     border-color: var(--secondary);
 }
 
+.todo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.todo-header h2 {
+    margin-bottom: 0; /* Menghilangkan margin bawah bawaan h2 */
+}
+
 .todo-input {
     display: flex;
     gap: var(--spacing-sm);
@@ -231,6 +242,24 @@ body {
 .todo-items {
     max-height: 250px;
     overflow-y: auto;
+}
+
+.sort-select {
+    padding: 0.35rem 0.6rem;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: #ffffff;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.sort-select:focus {
+    border-color: var(--secondary);
 }
 
 /* Links Card */
