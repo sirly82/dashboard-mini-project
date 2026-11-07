@@ -2,13 +2,15 @@
 (function() {
     "use strict";
     
-    // Configuration
+    // ======================
+    // 1. Configuration & State
+    // ======================
     const CONFIG = {
         STORAGE_KEY: "todoLifeDashboard",
-        TIMER_DURATION: 25 * 60, // 25 minutes in seconds
+        TIMER_DURATION: 25 * 60, // Default 25 minutes in seconds
         UPDATE_INTERVALS: {
-            TIME: 1000,     // 1 second (diperbarui setiap detik untuk detik)
-            TIMER: 1000     // 1 second
+            TIME: 1000,     // Updated every second for live clock
+            TIMER: 1000     // 1 second tick for focus timer
         }
     };
     
@@ -16,8 +18,8 @@
     let state = {
         todos: [],
         quickLinks: [],
-        userName: "Friend", // default name
-        theme: "light", // default theme
+        userName: "Friend", // Default user name
+        theme: "light",     // Default theme mode
         currentSort: "newest",
         timer: {
             isRunning: false,
@@ -26,8 +28,13 @@
         }
     };
 
+    // ======================
+    // 2. Theme Manager
+    // ======================
+
     /**
-     * Terapkan tema (light/dark) ke atribut HTML dan perbarui ikon tombol
+     * Apply theme (light/dark) to HTML attribute and update toggle button icon
+     * @param {string} theme Mode ('light' or 'dark')
      */
     function applyTheme(theme) {
         document.documentElement.setAttribute("data-theme", theme);
@@ -38,7 +45,7 @@
     }
 
     /**
-     * Ganti tema antara light dan dark
+     * Toggle theme state between light and dark
      */
     function toggleTheme() {
         state.theme = state.theme === "dark" ? "light" : "dark";
@@ -47,15 +54,15 @@
     }
     
     // ======================
-    // 2.2 Time Formatting Functions
+    // 3. Time & Greeting Functions
     // ======================
 
-    // Variabel untuk menyimpan audio oscillator alarm
+    // Variables for Web Audio API oscillator alarm fallback
     let alarmOscillator = null;
     let alarmAudioCtx = null;
 
     /**
-     * Memutar suara alarm beep berulang menggunakan Web Audio API
+     * Play repeating alarm beep sound using Web Audio API
      */
     function startAlarmSound() {
         try {
@@ -64,9 +71,9 @@
             const gainNode = alarmAudioCtx.createGain();
 
             alarmOscillator.type = 'sine';
-            alarmOscillator.frequency.setValueAtTime(880, alarmAudioCtx.currentTime); // Nada A5
+            alarmOscillator.frequency.setValueAtTime(880, alarmAudioCtx.currentTime); // Tone A5
 
-            // Efek beep putus-putus
+            // Intermittent beep gain effect
             gainNode.gain.setValueAtTime(0.3, alarmAudioCtx.currentTime);
             
             alarmOscillator.connect(gainNode);
@@ -79,7 +86,7 @@
     }
 
     /**
-     * Menghentikan suara alarm
+     * Stop Web Audio API alarm sound
      */
     function stopAlarmSound() {
         if (alarmOscillator) {
@@ -98,11 +105,9 @@
     }
     
     /**
-     * Format time as HH:MM:SS (Termasuk Detik)
-     * 
+     * Format time as HH:MM:SS (includes seconds)
      * @param {Date} date Date object
-     * 
-     * @returns {string} Formatted time
+     * @returns {string} Formatted time string
      */
     function formatTime(date) {
         const hours = date.getHours().toString().padStart(2, "0");
@@ -112,11 +117,9 @@
     }
     
     /**
-     * Format date as readable string
-     * 
+     * Format date as a readable localized string
      * @param {Date} date Date object
-     * 
-     * @returns {string} Formatted date
+     * @returns {string} Formatted date string
      */
     function formatDate(date) {
         const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
@@ -124,10 +127,8 @@
     }
     
     /**
-     * Get greeting based on time of day with catchy messages
-     * 
+     * Get greeting title and quote based on current hour of the day
      * @param {number} hour Current hour (0-23)
-     * 
      * @returns {object} Greeting title & motivational quote
      */
     function getGreetingData(hour) {
@@ -155,7 +156,7 @@
     }
     
     /**
-     * Update greeting display
+     * Update dynamic greeting, clock, and quote display
      */
     function updateGreeting() {
         const now = new Date();
@@ -175,15 +176,13 @@
     }
     
     // ======================
-    // 3.2 Timer State Management
+    // 4. Timer Display & Overlay Controls
     // ======================
     
     /**
      * Format timer display as MM:SS
-     * 
      * @param {number} seconds Total seconds
-     * 
-     * @returns {string} Formatted timer
+     * @returns {string} Formatted timer string
      */
     function formatTimerDisplay(seconds) {
         const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -192,17 +191,120 @@
     }
     
     /**
-     * Update timer display
+     * Update timer display elements on main card and focus overlay
      */
     function updateTimerDisplay() {
-        const timerDisplay = document.getElementById("timer-display");
-        if (timerDisplay) {
-            timerDisplay.textContent = formatTimerDisplay(state.timer.remainingSeconds);
-        }
+        const display = document.getElementById("timer-display");
+        const focusDisplay = document.getElementById("focus-timer-display");
+        const formatted = formatTimerDisplay(state.timer.remainingSeconds);
+        
+        if (display) display.textContent = formatted;
+        if (focusDisplay) focusDisplay.textContent = formatted;
     }
 
     /**
-     * Tampilkan Modal Custom untuk Input/Edit Nama Pengguna
+     * Open Full-Screen Focus Mode overlay
+     */
+    function openFocusOverlay() {
+        const overlay = document.getElementById("focus-overlay");
+        const greetingText = document.getElementById("focus-greeting-text");
+        if (greetingText) {
+            greetingText.textContent = `Shh... Focus Time, ${state.userName}! 🤫`;
+        }
+        if (overlay) overlay.classList.add("active");
+    }
+
+    /**
+     * Close Full-Screen Focus Mode overlay
+     */
+    function closeFocusOverlay() {
+        const overlay = document.getElementById("focus-overlay");
+        if (overlay) overlay.classList.remove("active");
+    }
+
+    /**
+     * Pause timer while keeping the Focus Overlay visible
+     */
+    function pauseTimer() {
+        if (!state.timer.isRunning) return;
+        
+        if (state.timer.intervalId) {
+            clearInterval(state.timer.intervalId);
+            state.timer.intervalId = null;
+        }
+        state.timer.isRunning = false;
+        
+        updateTimerControls();
+        updateOverlayPauseButton();
+    }
+
+    /**
+     * Resume timer from pause state inside Focus Overlay
+     */
+    function resumeTimer() {
+        if (state.timer.isRunning) return;
+
+        state.timer.isRunning = true;
+        updateTimerControls();
+        updateOverlayPauseButton();
+
+        state.timer.intervalId = setInterval(() => {
+            if (state.timer.remainingSeconds > 0) {
+                state.timer.remainingSeconds--;
+                updateTimerDisplay();
+                
+                // Timer completed
+                if (state.timer.remainingSeconds === 0) {
+                    stopTimer();
+                    
+                    const audio = document.getElementById("timer-notification");
+                    if (audio) {
+                        audio.currentTime = 0;
+                        audio.loop = true;
+                        audio.play().catch(e => console.log("Audio play failed:", e));
+                    }
+                    
+                    setTimeout(() => {
+                        showTimerModal("Time is up! Take a short break or start a new session.", () => {
+                            if (audio) {
+                                audio.pause();
+                                audio.currentTime = 0;
+                                audio.loop = false;
+                            }
+                        });
+                    }, 100);
+                }
+            }
+        }, CONFIG.UPDATE_INTERVALS.TIMER);
+    }
+
+    /**
+     * Update text and styling of overlay pause/resume button
+     */
+    function updateOverlayPauseButton() {
+        const pauseBtn = document.getElementById("overlay-pause-btn");
+        if (pauseBtn) {
+            if (state.timer.isRunning) {
+                pauseBtn.textContent = "⏸ Pause";
+                pauseBtn.style.background = "var(--accent)";
+                pauseBtn.style.color = "#5c3d00";
+            } else {
+                pauseBtn.textContent = "▶ Resume";
+                pauseBtn.style.background = "var(--primary)";
+                pauseBtn.style.color = "#003366";
+            }
+        }
+    }
+
+    // ======================
+    // 5. Custom Modal UI System
+    // ======================
+
+    /**
+     * Display Custom Modal for User Name Input/Edit
+     * @param {string} titleText Modal header title
+     * @param {string} initialValue Preset input name value
+     * @param {function} onSave Callback function when saved
      */
     function showNameModal(titleText, initialValue, onSave) {
         const existingModal = document.getElementById("custom-name-modal");
@@ -263,7 +365,8 @@
     }
 
     /**
-     * Tampilkan Modal Custom untuk Tambah Quick Link
+     * Display Custom Modal for Adding Quick Link
+     * @param {function} onSave Callback function with name and url
      */
     function showAddLinkModal(onSave) {
         const existingModal = document.getElementById("custom-add-link-modal");
@@ -319,7 +422,10 @@
     }
 
     /**
-     * Tampilkan Modal Konfirmasi Konfirmasi Hapus Custom
+     * Display Custom Confirmation Modal for Deletion
+     * @param {string} title Confirmation title
+     * @param {string} message Confirmation warning text
+     * @param {function} onConfirm Action to execute upon confirmation
      */
     function showConfirmModal(title, message, onConfirm) {
         const existingModal = document.getElementById("custom-confirm-modal");
@@ -356,7 +462,9 @@
     }
 
     /**
-     * Tampilkan Modal Custom agar Audio Loop tetap berjalan tanpa dibekukan browser
+     * Display Custom Modal so Audio Loop continues without browser alert freezing
+     * @param {string} message Completion message
+     * @param {function} onConfirm Action executed when user clicks OK
      */
     function showTimerModal(message, onConfirm) {
         const existingModal = document.getElementById("custom-timer-modal");
@@ -372,7 +480,7 @@
 
         modal.innerHTML = `
             <div style="background: #ffffff; padding: 2rem; border-radius: 20px; text-align: center; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 2px solid var(--accent); animation: fadeIn 0.3s ease;">
-                <h3 style="font-size: 1.4rem; margin-bottom: 0.8rem; font-family: var(--font-heading); color: #333;">🎉 Focus Session Finish!</h3>
+                <h3 style="font-size: 1.4rem; margin-bottom: 0.8rem; font-family: var(--font-heading); color: #333;">🎉 Focus Session Finished!</h3>
                 <p style="margin-bottom: 1.5rem; color: #666; font-size: 0.95rem;">${message}</p>
                 <button id="close-timer-modal" class="btn start" style="width: 100%; padding: 0.7rem; font-size: 1rem;">OK</button>
             </div>
@@ -386,13 +494,46 @@
         });
     }
     
+    // ======================
+    // 6. Pomodoro Timer Execution Module
+    // ======================
+
     /**
-     * Start the timer
+     * Calculate total seconds from minutes and seconds input fields
+     * @returns {number} Total duration in seconds
+     */
+    function getSecondsFromInput() {
+        const minInput = document.getElementById("custom-minutes-input");
+        const secInput = document.getElementById("custom-seconds-input");
+        
+        const minutes = minInput ? parseInt(minInput.value, 10) || 0 : 0;
+        const seconds = secInput ? parseInt(secInput.value, 10) || 0 : 0;
+        
+        return (minutes * 60) + seconds;
+    }
+    
+    /**
+     * Start countdown timer
      */
     function startTimer() {
         if (state.timer.isRunning) return;
         
+        // If remaining time is zero or uninitialized, calculate from inputs
+        if (state.timer.remainingSeconds <= 0) {
+            state.timer.remainingSeconds = getSecondsFromInput();
+        }
+
+        // Check if duration is valid
+        if (state.timer.remainingSeconds <= 0) {
+            showError("Please set a valid focus duration!", "custom-minutes-input");
+            return;
+        }
+
         state.timer.isRunning = true;
+        openFocusOverlay();
+        updateTimerControls();
+        updateTimerDisplay();
+
         state.timer.intervalId = setInterval(() => {
             if (state.timer.remainingSeconds > 0) {
                 state.timer.remainingSeconds--;
@@ -405,60 +546,53 @@
                     const audio = document.getElementById("timer-notification");
                     if (audio) {
                         audio.currentTime = 0;
-                        audio.loop = true; // Suara akan terus memutar berulang-ulang
+                        audio.loop = true; // Loop audio continuously
                         audio.play().catch(e => console.log("Audio play failed:", e));
                     }
                     
-                    // Tampilkan modal custom (audio akan terus berputar terus-menerus sampai tombol OK diklik)
-                    showTimerModal("Time is up! Take a short break or start a new session.", () => {
-                        if (audio) {
-                            audio.pause();
-                            audio.currentTime = 0;
-                            audio.loop = false;
-                        }
-                    });
+                    // Display custom modal (audio continues looping until OK is clicked)
+                    setTimeout(() => {
+                        showTimerModal("Time is up! Take a short break or start a new session.", () => {
+                            if (audio) {
+                                audio.pause();
+                                audio.currentTime = 0;
+                                audio.loop = false;
+                            }
+                        });
+                    }, 100);
                 }
             }
-        }, 1000);
-        
-        // Update button states
-        updateTimerButtonStates();
+        }, CONFIG.UPDATE_INTERVALS.TIMER);
     }
     
     /**
-     * Stop the timer
+     * Stop or pause countdown timer
      */
     function stopTimer() {
-        if (!state.timer.isRunning) return;
-        
-        clearInterval(state.timer.intervalId);
+        if (state.timer.intervalId) {
+            clearInterval(state.timer.intervalId);
+            state.timer.intervalId = null;
+        }
         state.timer.isRunning = false;
-        state.timer.intervalId = null;
         
-        // Update button states
-        updateTimerButtonStates();
+        closeFocusOverlay();
+        updateTimerControls();
     }
     
     /**
-     * Reset the timer
+     * Reset countdown timer to initial input value
      */
     function resetTimer() {
         stopTimer();
-        const minInput = document.getElementById("custom-minutes-input");
-        const secInput = document.getElementById("custom-seconds-input");
-        
-        const minutes = minInput ? parseInt(minInput.value) || 0 : 0;
-        const seconds = secInput ? parseInt(secInput.value) || 0 : 0;
-        
-        state.timer.remainingSeconds = (minutes * 60) + seconds;
+        state.timer.remainingSeconds = getSecondsFromInput();
         updateTimerDisplay();
-        updateTimerButtonStates();
+        updateTimerControls();
     }
     
     /**
-     * Update timer button states
+     * Update timer control button states (Start, Stop, Reset)
      */
-    function updateTimerButtonStates() {
+    function updateTimerControls() {
         const startBtn = document.getElementById("start-timer");
         const stopBtn = document.getElementById("stop-timer");
         const resetBtn = document.getElementById("reset-timer");
@@ -468,16 +602,17 @@
         if (resetBtn) resetBtn.disabled = state.timer.isRunning;
     }
     
+    // Alias for function name compatibility
+    const updateTimerButtonStates = updateTimerControls;
+    
     // ======================
-    // 4.2 Todo Data Model
+    // 7. Todo Data Model & UI
     // ======================
     
     /**
-     * Create a new todo item
-     * 
+     * Create a new todo item object
      * @param {string} text Task description
-     * 
-     * @returns {object} Todo item
+     * @returns {object} Todo item data model
      */
     function createTodo(text) {
         return {
@@ -490,8 +625,7 @@
     }
     
     /**
-     * Add a new todo
-     * 
+     * Add a new todo item
      * @param {string} text Task description
      */
     function addTodo(text) {
@@ -503,14 +637,13 @@
         renderTodos();
         showSuccess("Task added successfully!");
         
-        // Clear input
+        // Clear input field
         const todoInput = document.getElementById("todo-input");
         if (todoInput) todoInput.value = "";
     }
     
     /**
-     * Toggle todo completion
-     * 
+     * Toggle completion status of a todo item
      * @param {string} id Todo ID
      */
     function toggleTodo(id) {
@@ -524,8 +657,7 @@
     }
     
     /**
-     * Delete a todo
-     * 
+     * Delete a todo item by ID
      * @param {string} id Todo ID
      */
     function deleteTodo(id) {
@@ -535,7 +667,7 @@
     }
     
     /**
-     * Render all todos
+     * Render all todo items with sorting logic applied
      */
     function renderTodos() {
         const container = document.getElementById("todo-items");
@@ -548,44 +680,36 @@
             return;
         }
         
-        container.innerHTML = state.todos.map(todo => `
-            <div class="todo-item ${todo.completed ? "completed" : ""}">
-                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.completed ? "checked" : ""}>
-                <span class="todo-text">${escapeHtml(todo.text)}</span>
-                <button class="todo-delete" data-id="${todo.id}" title="Hapus tugas">🗑️</button>
-            </div>
-        `).join("");
-
-        // Buat salinan array todos agar tidak merusak data asli
+        // Create a shallow copy of todos to avoid mutating original state array
         let sortedTodos = [...state.todos];
 
-        // Logika Pengurutan berdasarkan kriteria terpilih
+        // Sorting logic based on selected criterion
         if (state.currentSort === "newest") {
-            sortedTodos.reverse(); // Urutan terbaru di atas
+            sortedTodos.reverse(); // Newest items first
         } else if (state.currentSort === "status") {
-            // Belum selesai (false) ditaruh di atas, sudah selesai (true) di bawah
+            // Uncompleted items first (false), completed items last (true)
             sortedTodos.sort((a, b) => a.completed - b.completed);
         } else if (state.currentSort === "alphabetical") {
             sortedTodos.sort((a, b) => a.text.localeCompare(b.text));
         }
-        // Catatan: untuk "oldest", menggunakan urutan array asli
+        // Note: "oldest" keeps original insertion order
 
         container.innerHTML = sortedTodos.map(todo => `
             <div class="todo-item ${todo.completed ? "completed" : ""}">
                 <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.completed ? "checked" : ""}>
                 <span class="todo-text">${escapeHtml(todo.text)}</span>
-                <button class="todo-delete" data-id="${todo.id}" title="Hapus tugas">🗑️</button>
+                <button class="todo-delete" data-id="${todo.id}" title="Delete task">🗑️</button>
             </div>
         `).join("");
         
-        // Event listener untuk checklist completed
+        // Event listener for completion checkbox
         container.querySelectorAll(".todo-checkbox").forEach(checkbox => {
             checkbox.addEventListener("change", (e) => {
                 toggleTodo(e.target.dataset.id);
             });
         });
         
-        // Event listener untuk tombol hapus (🗑️)
+        // Event listener for delete button (🗑️) with confirmation modal
         container.querySelectorAll(".todo-delete").forEach(button => {
             button.addEventListener("click", (e) => {
                 const id = e.target.dataset.id;
@@ -598,7 +722,11 @@
         });
     }
 
-    // Helper sanitasi teks HTML sederhana
+    /**
+     * Simple HTML text sanitization helper
+     * @param {string} str Raw string
+     * @returns {string} Sanitized string
+     */
     function escapeHtml(str) {
         return str.replace(/[&<>"']/g, (m) => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
@@ -606,14 +734,14 @@
     }
     
     // ======================
-    // 5.2 Quick Links Data Model
+    // 8. Quick Links Model & UI
     // ======================
     
     /**
-     * Create a new quick link
-     * @param {string} name - Website name
-     * @param {string} url - Website URL
-     * @returns {object} Quick link
+     * Create a new quick link item object
+     * @param {string} name Website name
+     * @param {string} url Website URL
+     * @returns {object} Quick link object
      */
     function createQuickLink(name, url) {
         return {
@@ -626,13 +754,13 @@
     
     /**
      * Add a new quick link
-     * @param {string} name - Website name
-     * @param {string} url - Website URL
+     * @param {string} name Website name
+     * @param {string} url Website URL
      */
     function addQuickLink(name, url) {
         if (!validateLinkInput(name, url)) return;
         
-        // Ensure URL has protocol
+        // Ensure URL has explicit HTTP/HTTPS protocol
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             url = "https://" + url;
         }
@@ -642,13 +770,13 @@
         saveState();
         renderQuickLinks();
         
-        // Notifikasi sukses sekarang akan muncul di kartu Quick Links (di bawah tombol + Add Link)
+        // Display success notification under Quick Links card
         showSuccess("Link added successfully!", "add-link");
     }
     
     /**
-     * Delete a quick link
-     * @param {string} id - Link ID
+     * Delete a quick link by ID
+     * @param {string} id Link ID
      */
     function deleteQuickLink(id) {
         state.quickLinks = state.quickLinks.filter(link => link.id !== id);
@@ -657,7 +785,7 @@
     }
     
     /**
-     * Render all quick links
+     * Render all quick link cards
      */
     function renderQuickLinks() {
         const container = document.getElementById("links-grid");
@@ -676,11 +804,11 @@
                     <span>🌐</span>
                     <span class="link-name">${escapeHtml(link.name)}</span>
                 </a>
-                <button class="link-delete" title="Hapus Link">✖</button>
+                <button class="link-delete" title="Delete link">✖</button>
             </div>
         `).join("");
         
-        // Add event listeners for delete buttons
+        // Add event listeners for delete buttons with confirmation modal
         container.querySelectorAll(".link-delete").forEach((button, index) => {
             button.addEventListener("click", (e) => {
                 e.preventDefault();
@@ -695,18 +823,18 @@
     }
     
     // ======================
-    // 6.1 Data Manager Module
+    // 9. LocalStorage Data Manager
     // ======================
     
     /**
-     * Save state to Local Storage
+     * Save application state to Local Storage
      */
     function saveState() {
         try {
             const data = {
                 todos: state.todos,
                 quickLinks: state.quickLinks,
-                userName: state.userName, // save user name
+                userName: state.userName,
                 theme: state.theme
             };
             localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
@@ -716,7 +844,7 @@
     }
     
     /**
-     * Load state from Local Storage
+     * Load application state from Local Storage
      */
     function loadState() {
         try {
@@ -734,13 +862,13 @@
     }
 
     // ======================
-    // 4.4 Input Validation and User Feedback
+    // 10. Input Validation & User Feedback
     // ======================
 
     /**
-     * Show error message
-     * @param {string} message - Error message
-     * @param {string} elementId - Element to highlight (optional)
+     * Show error message below target element
+     * @param {string} message Error message
+     * @param {string} elementId Element ID to highlight (optional)
      */
     function showError(message, elementId = "todo-input") {
         const existingErrors = document.querySelectorAll(".error-message");
@@ -761,7 +889,7 @@
         
         const targetEl = document.getElementById(elementId);
         if (targetEl) {
-            // Ambil wrapper .todo-input agar notifikasi disisipkan tepat di bawah baris input
+            // Get wrapper element so notification inserts directly below input row
             const container = targetEl.closest(".todo-input") || targetEl;
             container.parentNode.insertBefore(errorEl, container.nextSibling);
             
@@ -778,8 +906,9 @@
     }
 
     /**
-     * Show success message
-     * @param {string} message - Success message
+     * Show success message below target element
+     * @param {string} message Success message
+     * @param {string} elementId Target element ID (optional)
      */
     function showSuccess(message, elementId = "todo-input") {
         const existingSuccess = document.querySelectorAll(".success-message");
@@ -800,7 +929,7 @@
         
         const targetEl = document.getElementById(elementId);
         if (targetEl) {
-            // Ambil wrapper .todo-input agar notifikasi disisipkan tepat di bawah baris input
+            // Get wrapper element so notification inserts directly below input row
             const container = targetEl.closest(".todo-input") || targetEl;
             container.parentNode.insertBefore(successEl, container.nextSibling);
             
@@ -817,8 +946,8 @@
     }
 
     /**
-     * Validate todo input
-     * @param {string} text - Todo text
+     * Validate todo task input
+     * @param {string} text Todo text
      * @returns {boolean} True if valid
      */
     function validateTodoInput(text) {
@@ -834,7 +963,7 @@
             return false;
         }
 
-        // CEK DUPLIKAT: Periksa apakah teks sudah ada di dalam state.todos
+        // DUPLICATE CHECK: Verify if task already exists in state.todos
         const isDuplicate = state.todos.some(todo => todo.text.trim().toLowerCase() === cleanText);
         if (isDuplicate) {
             showError("This task is already in your list!", "todo-input");
@@ -845,25 +974,25 @@
     }
 
     /**
-     * Validate quick link input
-     * @param {string} name - Website name
-     * @param {string} url - Website URL
+     * Validate quick link inputs
+     * @param {string} name Website name
+     * @param {string} url Website URL
      * @returns {boolean} True if valid
      */
     function validateLinkInput(name, url) {
         if (!name || !name.trim()) {
-            showError("Website name cannot be empty!");
+            showError("Website name cannot be empty!", "add-link");
             return false;
         }
         
         if (!url || !url.trim()) {
-            showError("Website URL cannot be empty!");
+            showError("Website URL cannot be empty!", "add-link");
             return false;
         }
         
         const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]{2,}(\/.*)?$/i;
         if (!urlPattern.test(url) && !url.startsWith("http://") && !url.startsWith("https://")) {
-            showError("Please enter a valid URL (e.g., example.com or https://example.com)");
+            showError("Please enter a valid URL (e.g., example.com or https://example.com)", "add-link");
             return false;
         }
         
@@ -871,28 +1000,21 @@
     }
     
     // ======================
-    // Event Listeners
+    // 11. Event Listeners Setup
     // ======================
     
     /**
-     * Set up event listeners
+     * Set up all DOM event listeners
      */
     function setupEventListeners() {
-        // Timer buttons
-        const startBtn = document.getElementById("start-timer");
-        const stopBtn = document.getElementById("stop-timer");
-        const resetBtn = document.getElementById("reset-timer");
-        const customTimerInput = document.getElementById("custom-timer-input");
-        const minInput = document.getElementById("custom-minutes-input");
-        const secInput = document.getElementById("custom-seconds-input");
-        const userNameEl = document.getElementById("user-name");
-        const sortSelect = document.getElementById("sort-select");
+        // Theme toggle button
         const themeToggleBtn = document.getElementById("theme-toggle");
-
         if (themeToggleBtn) {
             themeToggleBtn.addEventListener("click", toggleTheme);
         }
         
+        // Editable user name click listener
+        const userNameEl = document.getElementById("user-name");
         if (userNameEl) {
             userNameEl.addEventListener("click", () => {
                 showNameModal("Change Your Name", state.userName, (newName) => {
@@ -903,22 +1025,41 @@
                 });
             });
         }
+
+        // Focus Overlay Controls
+        const overlayPauseBtn = document.getElementById("overlay-pause-btn");
+        const overlayStopBtn = document.getElementById("overlay-stop-btn");
+
+        if (overlayPauseBtn) {
+            overlayPauseBtn.addEventListener("click", () => {
+                if (state.timer.isRunning) {
+                    pauseTimer();
+                } else {
+                    resumeTimer();
+                }
+            });
+        }
         
+        if (overlayStopBtn) {
+            overlayStopBtn.addEventListener("click", () => {
+                stopTimer(); // Menghentikan timer & menutup layar overlay
+            });
+        }
+        
+        // Timer action buttons
+        const startBtn = document.getElementById("start-timer");
+        const stopBtn = document.getElementById("stop-timer");
+        const resetBtn = document.getElementById("reset-timer");
+        const minInput = document.getElementById("custom-minutes-input");
+        const secInput = document.getElementById("custom-seconds-input");
+
         if (startBtn) startBtn.addEventListener("click", startTimer);
         if (stopBtn) stopBtn.addEventListener("click", stopTimer);
         if (resetBtn) resetBtn.addEventListener("click", resetTimer);
 
-        if (customTimerInput) {
-            customTimerInput.addEventListener("change", () => {
-                if (!state.timer.isRunning) {
-                    resetTimer();
-                }
-            });
-        }
-
+        // Add 'input' and 'change' listeners for instant time updates when timer is idle
         [minInput, secInput].forEach(input => {
             if (input) {
-                // Menambahkan listener 'input' dan 'change' agar perubahan waktu langsung direspons
                 ["input", "change"].forEach(eventType => {
                     input.addEventListener(eventType, () => {
                         if (!state.timer.isRunning) {
@@ -929,7 +1070,7 @@
             }
         });
         
-        // Todo input with improved validation
+        // Todo input submission and validation reset
         const todoInput = document.getElementById("todo-input");
         const addTodoBtn = document.getElementById("add-todo");
         
@@ -944,14 +1085,14 @@
                 }
             });
             
-            // Clear validation on input
             todoInput.addEventListener("input", () => {
                 todoInput.style.borderColor = "";
                 todoInput.style.boxShadow = "";
             });
         }
 
-        // Event listener dropdown pengurutan tugas
+        // Event listener for task sorting dropdown
+        const sortSelect = document.getElementById("sort-select");
         if (sortSelect) {
             sortSelect.addEventListener("change", (e) => {
                 state.currentSort = e.target.value;
@@ -959,7 +1100,7 @@
             });
         }
         
-        // Quick links with improved interface
+        // Quick links modal prompt listener
         const addLinkBtn = document.getElementById("add-link");
         if (addLinkBtn) {
             addLinkBtn.addEventListener("click", () => {
@@ -970,7 +1111,7 @@
         }
     }
 
-    // Add CSS animation for fadeIn
+    // Add CSS keyframe animation for fadeIn feedback messages dynamically
     const style = document.createElement("style");
     style.textContent = `
         @keyframes fadeIn {
@@ -981,17 +1122,17 @@
     document.head.appendChild(style);
     
     // ======================
-    // Initialization
+    // 12. Initialization Module
     // ======================
     
     /**
-     * Initialize the application
+     * Initialize the dashboard application
      */
     function init() {
-        // Load saved state
+        // Load saved state from Local Storage
         loadState();
 
-        // Jika nama masih default/kosong saat pertama masuk website, munculkan modal nama
+        // If user name is default or empty on first visit, show name prompt modal
         if (!localStorage.getItem(CONFIG.STORAGE_KEY) || state.userName === "Friend") {
             setTimeout(() => {
                 showNameModal("Welcome! 👋", "", (newName) => {
@@ -1002,21 +1143,21 @@
             }, 400);
         }
 
-        // Terapkan tema yang tersimpan
+        // Apply saved theme mode
         applyTheme(state.theme);
         
-        // Set up initial displays & reset timer
+        // Set up initial displays & reset timer display
         updateGreeting();
         resetTimer();
         
-        // Render data
+        // Render data modules
         renderTodos();
         renderQuickLinks();
         
-        // Set up event listeners
+        // Set up DOM event listeners
         setupEventListeners();
         
-        // Start time updates
+        // Start real-time clock updates
         setInterval(updateGreeting, CONFIG.UPDATE_INTERVALS.TIME);
         
         console.log("To-Do List Life Dashboard initialized! 🎉");

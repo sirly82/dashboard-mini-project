@@ -555,3 +555,122 @@ footer {
         flex-direction: column;
     }
 }
+
+/* ==========================================
+   FULL-SCREEN FOCUS OVERLAY
+   ========================================== */
+.focus-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-gradient);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9990;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.focus-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.focus-overlay-content {
+    background: var(--card-bg);
+    border: 3px solid var(--accent);
+    padding: 3.5rem 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    max-width: 900px; /* Diperbesar dari 550px agar jauh lebih lebar */
+    width: 92vw;      /* Menyesuaikan 92% lebar layar */
+    min-height: 82vh; /* Dibuat tinggi hingga 82% area layar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    animation: focusZoomIn 0.3s ease;
+}
+
+.focus-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--text-light);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.focus-close-btn:hover {
+    background: #ff6b6b;
+    color: white;
+    border-color: #ff6b6b;
+}
+
+.focus-greeting {
+    font-family: var(--font-heading);
+    font-size: 2.2rem; /* Diperbesar */
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.focus-timer-display {
+    font-size: 9.5rem; /* Angka diperbesar ekstra raksasa */
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--text);
+    margin: 1rem 0;
+    letter-spacing: 5px;
+}
+
+.focus-quote {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+}
+
+.focus-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 300px;
+}
+
+.focus-controls .btn {
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+@keyframes focusZoomIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .focus-overlay-content {
+        min-height: 90vh;
+        padding: 2.5rem 1.5rem;
+    }
+    
+    .focus-timer-display {
+        font-size: 5.5rem;
+    }
+}
